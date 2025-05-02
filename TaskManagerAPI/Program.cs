@@ -6,6 +6,27 @@ using System.Text.Json.Serialization;
 
 public class Program
 {
+    // This method is used to send the task to the external service (EXTRA)
+    private static async Task addRecord(TaskItem task) {
+        using var client = new HttpClient();
+        client.BaseAddress = new Uri("https://services.paloalto.swiss:10443");
+        var payload = new
+        {
+            userId = 23,
+            passwordWS = "1234",
+            cabinetId = "804dfcb0-cf00-49c7-bb23-ec68bc3a6097",
+            indexFields = new[]
+            {
+                new { fieldName = "TASK_ID", fieldValue = task.Id },
+                new { fieldName = "TASK_DESCRIPTION", fieldValue = task.Description },
+                new { fieldName = "CREATION DATE", fieldValue = task.CreationDate.ToString("yyyy-MM-dd") }
+            }
+        };
+        var response = await client.PostAsJsonAsync("/api2/Docuware/add-record", payload);
+        response.EnsureSuccessStatusCode();
+    }
+
+
     public static void Main(string[] args)
     {
 
@@ -57,9 +78,13 @@ public class Program
 
             await File.WriteAllTextAsync(filePath, updatedJson);
 
+            // Call the external service to add the record (EXTRA)
+            await addRecord(newTask);
+
             return Results.Created($"/tasks/{newTask.Id}", newTask);
         });
 
+        // GET /tasks: retrieves all tasks for the tenant
         app.MapGet("/tasks", async (HttpContext context) =>
         {
             var tenantId = context.Request.Headers["X-Tenant-ID"].ToString();
@@ -79,6 +104,7 @@ public class Program
             return Results.Ok(tenantTasks);
         });
 
+        // PUT /tasks/{id}: updates a task for the tenant
         app.MapPut("/tasks/{id}", async (HttpContext context, string id, UpdateTaskRequest update) =>
         {
             var tenantId = context.Request.Headers["X-Tenant-ID"].ToString();

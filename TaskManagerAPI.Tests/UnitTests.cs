@@ -6,11 +6,11 @@ using System.Text.Json;
 
 using Xunit;
 
-public class UnitTest1 : IClassFixture<WebApplicationFactory<Program>>
+public class UnitTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public UnitTest1(WebApplicationFactory<Program> factory)
+    public UnitTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -32,16 +32,6 @@ public class UnitTest1 : IClassFixture<WebApplicationFactory<Program>>
         var task = await response.Content.ReadAsStringAsync();
 
         Assert.Contains("Test task", task);
-    }
-}
-
-public class UnitTest2 : IClassFixture<WebApplicationFactory<Program>>
-{
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public UnitTest2(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
     }
 
     [Fact]
@@ -68,16 +58,6 @@ public class UnitTest2 : IClassFixture<WebApplicationFactory<Program>>
         var tasks = await response.Content.ReadAsStringAsync();
         Assert.Contains("Test 2 task", task);
     }
-}
-
-public class UnitTest3 : IClassFixture<WebApplicationFactory<Program>>
-{
-    private readonly WebApplicationFactory<Program> _factory;
-
-    public UnitTest3(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
 
     [Fact]
     public async Task PutTask_ReturnsOkResponse_AndUpdatesTask()
@@ -99,7 +79,6 @@ public class UnitTest3 : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("Test 3 task", task);
         var taskJson = JsonDocument.Parse(task).RootElement;
         _taskId = taskJson.GetProperty("id").GetString(); // Extract the taskId for the PUT request
-        Console.WriteLine($"Task ID: {_taskId}"); // Log the taskId for debugging
 
         // Prepare the updated task data
         var updatedTask = new { Description = "Updated test task" };
