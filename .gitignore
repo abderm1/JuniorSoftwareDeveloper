@@ -5,3 +5,7 @@ obj/
 *.vs
 .vscode/
 *.DS_Store
+
+tasks.json
+Properties/launchSettings.json
+
